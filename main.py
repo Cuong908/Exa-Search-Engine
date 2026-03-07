@@ -1,50 +1,30 @@
 from fastapi import FastAPI, Request
-from fastapi.responses import HTMLResponse, FileResponse
+from fastapi.responses import HTMLResponse
+from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from datetime import datetime
 from functools import lru_cache
 from exa_py import Exa
 import uuid
+from dotenv import load_dotenv
 import os
 import uvicorn
 
 app = FastAPI()
-exa = Exa("8da3779c-d967-449a-b5b3-1fb386e41604")
+
+load_dotenv()
+api_key = os.environ.get("EXA_API_KEY")
+exa = Exa(api_key=api_key)
 
 templates = Jinja2Templates(directory="templates")
 
-@app.get("/background.jpeg")
-def get_background():
-    return FileResponse("background.jpeg", media_type="image/jpeg")
-
-@app.get("/background_dark.jpeg")
-def get_background_dark():
-    return FileResponse("background_dark.jpeg", media_type="image/jpeg")
-
-@app.get("/infoBG.jpeg")
-def get_infoBG():
-    return FileResponse("infoBG.jpeg", media_type="image/jpeg")
-
-@app.get("/mic.png")
-def get_mic():
-    return FileResponse("mic.png", media_type="image/png")
-
-@app.get("/mic_dark.png")
-def get_mic_dark():
-    return FileResponse("mic_dark.png", media_type="image/png")
-
-@app.get("/speaking.png")
-def get_speaking():
-    return FileResponse("speaking.png", media_type="image/png")
-
-@app.get("/speaking_dark.png")
-def get_speaking_dark():
-    return FileResponse("speaking_dark.png", media_type="image/png")
+app.mount("/static", StaticFiles(directory="static"), name="static")
 
 @app.get("/", response_class=HTMLResponse)
 def home(request: Request):
     return templates.TemplateResponse("home.html", {"request": request})
 
+# LRU cache to avoid redundant Exa API calls for repeated queries
 @lru_cache(maxsize=100)
 def cacheSearch(query: str):
     return exa.search_and_contents(
@@ -72,16 +52,18 @@ def result(q: str, request: Request):
             response = cacheSearch(q)
 
             for result in response.results: 
+                # Format the returned ISO 8601 dates into MM/DD/YYYY for readability
                 published_date = result.published_date
                 if published_date:
                     try:
                         dt = datetime.fromisoformat(published_date.replace("Z", "+00:00"))
                         formatted_date = f"{dt.month:02d}/{dt.day:02d}/{dt.year}"
-                    except:
+                    except (ValueError, AttributeError):
                         formatted_date = published_date[:10]
                 else:
                     formatted_date = "N/A"
 
+                # Shorten title, description, and url if too long to prevent overflow
                 title = "No title found"
                 if result.title and len(result.title) < 50:
                     title = result.title
@@ -119,18 +101,21 @@ def result(q: str, request: Request):
                 "query": q,
                 "results": format_results
             }
+
             if not searchHistory[sessionID] or searchHistory[sessionID][-1]["query"] != q:
                 searchHistory[sessionID].append(searchEntry)
+            # Cap history at 10 entries per session to limit memory usage
             if len(searchHistory[sessionID]) > 10:
                 searchHistory[sessionID].pop(0)
 
         except Exception as e:
+            print(f"Search error for query '{q}': {e}")
             errorEntry = {
                 "query": q,
                 "results": [{
-                    "title": "N/A",
+                    "title": "Search Failed",
                     "published_date": "N/A",
-                    "description": "N/A",
+                    "description": "An error has occured. Please try again!",
                     "url": "N/A"
                 }],
                 "error": True
@@ -170,24 +155,27 @@ def cacheInfo():
 
 @app.get("/api/search")
 def search(query: str):
-    response = exa.search_and_contents(
-        query,
-        num_results = 5,
-        type = "auto",
-    )
+    try:
+        response = exa.search_and_contents(
+            query,
+            num_results = 5,
+            type = "auto",
+        )
 
-    format_results = []
-    for result in response.results:
-        format_results.append({
-            "title": result.title or "No title",
-            "published_date": result.published_date,
-            "url": result.url,
-        })
+        format_results = []
+        for result in response.results:
+            format_results.append({
+                "title": result.title or "No title",
+                "published_date": result.published_date,
+                "url": result.url,
+            })
 
-    return {
-        "query": query,
-        "results": format_results,
-    }
+        return {
+            "query": query,
+            "results": format_results,
+        }
+    except Exception as e:
+        return {"error": "Search failed", "Details": str(e)}
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000, reload=True)

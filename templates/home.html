@@ -7,17 +7,17 @@
                 top: 155px;
                 font-family: 'Times New Roman', Times, serif; 
                 text-align: center;
-                background-image: url("/background.jpeg");
+                background-image: url("/static/background.jpeg");
                 background-size: cover;
             }
             body.dark {
-                background-image: url("/background_dark.jpeg");
+                background-image: url("/static/background_dark.jpeg");
             }
             body.dark h1, body.dark h2 {
                 color: white;
             }
             body.dark #micBtn {
-                background-image: url('/mic_dark.png');
+                background-image: url('/static/mic_dark.png');
                 background: #4678b9;
             }
             body.dark #micBtn:hover {
@@ -156,7 +156,7 @@
                 bottom: 50px;
                 border: 3px solid black;
                 border-radius: 5px;
-                background-image: url("/infoBG.jpeg");
+                background-image: url("/static/infoBG.jpeg");
                 background-size: cover;
                 opacity: 0.85;
                 width: 380px;
@@ -187,7 +187,7 @@
         <div id="searchWrapper">
             <textarea id="query" placeholder="What's the total number of enrolled students at UC Berkeley" rows="2"></textarea>
             <button id="searchBtn">Search</button>
-            <button id="micBtn"><img src="/mic.png" width="18" height="18"></button>
+            <button id="micBtn"><img src="/static/mic.png" width="18" height="18"></button>
         </div>
 
         <div id="results"></div>
@@ -272,7 +272,7 @@
                         } else {
                             voiceInput.start();
                             isSpeaking = true;
-                            micBtn.innerHTML = '<img src="/speaking.png" width="18" height="18">';
+                            micBtn.innerHTML = '<img src="/static/speaking.png" width="18" height="18">';
                             micBtn.classList.add("speaking");
                         }
                     });
@@ -292,7 +292,7 @@
                     } else if (cmd === "refresh") {
                         window.location.reload();
                     } else if (cmd.startsWith("search for")) {
-                        textarea.value = cmd.replace("search for ").trim();
+                        textarea.value = cmd.replace("search for ", "").trim();
                     } else {
                         textarea.value = transcript;
                     }
@@ -301,15 +301,19 @@
                 voiceInput.onend = function() {
                     isSpeaking = false;
                     if (micBtn) {
-                        micBtn.innerHTML = '<img src="/mic.png" width="18" height="18">';
+                        micBtn.innerHTML = '<img src="/static/mic.png" width="18" height="18">';
                         micBtn.classList.remove("speaking");
                     }
                 }
 
-                voiceInput.onerror = function() {
+                voiceInput.onerror = function(e) {
+                    if (e.error === "not-allowed") {
+                        alert("Could not access mic. Please ensure you have granted mic permissions.")
+                    }
+
                     isSpeaking = false;
                     if (micBtn) {
-                        micBtn.innerHTML = '<img src="/mic.png" width="18" height="18">';
+                        micBtn.innerHTML = '<img src="/static/mic.png" width="18" height="18">';
                         micBtn.classList.remove("speaking");
                     }
                 }
