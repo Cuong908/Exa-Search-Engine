@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <style>
+            body {
+                position: relative;
+                top: 155px;
+                font-family: 'Times New Roman', Times, serif; 
+                text-align: center;
+                background-image: url("/background.jpeg");
+                background-size: cover;
+            }
+            body.dark {
+                background-image: url("/background_dark.jpeg");
+            }
+            body.dark h1, body.dark h2 {
+                color: white;
+            }
+            body.dark #micBtn {
+                background-image: url('/mic_dark.png');
+                background: #4678b9;
+            }
+            body.dark #micBtn:hover {
+                background: #6398df;
+            }
+            body.dark #micBtn.speaking {
+                background: #6398df;
+            }
+            body.dark #searchInfoBtn {
+                background-color: #e8b870;
+            }
+            body.dark #searchWrapper {
+                background: #2a4a6a;
+                border-color: #4a7aaa;
+            }
+            body.dark textarea::placeholder {
+                color: grey;
+            }
+            #darkModeBtn.light {
+                background-color: white;
+                color: black;
+            }
+            #darkModeBtn.light:hover {
+                background-color: #ddd;
+            }
+            #darkModeBtn {
+                position: fixed;
+                padding: 6px 12px;
+                font-size: 11px;
+                background-color: #333;
+                color: white;
+                border-radius: 5px;
+                bottom: 8px;
+                right: 10px;
+                cursor: pointer;
+            }
+            #darkModeBtn:hover {
+                background-color: #555;
+            }
+            h1 {
+                font-size: 80px;
+            }
+            h2 {
+                position: relative;
+                bottom: 50px;
+            }
+            textarea { 
+                font-size: 16px;
+                resize: none;
+                width: 650px;
+                overflow: auto;
+                line-height: inherit;
+                box-sizing: border-box;
+                border: none;
+                background: none;
+            }
+            textarea::placeholder {
+                color: #48474a;
+                position: absolute;
+                cursor: text;
+            }
+            #query {
+                position: relative;
+                left: 14px;
+                padding-top: 5px;
+            }
+            textarea:focus {
+                border: none;
+                outline: none;
+            }
+            #searchWrapper {
+                background: #6398df;
+                border: 3px solid #9cc6ff;
+                border-radius: 15px;
+                width: 650px;
+                position: relative;
+                margin-left: auto;
+                margin-right: auto;
+                bottom: 45px;
+            }
+            #searchBtn { 
+                padding: 6px 12px; 
+                font-size: 8px;
+                background-color: #4CAF50;
+                color: white;
+                border: 1px solid none;
+                border-radius: 5px;
+                cursor: pointer;
+                position: relative;
+                bottom: 6px;
+                left: 305px;
+            }
+            #searchBtn:hover {
+                background-color: #45a049;
+            }
+            #micBtn {
+                background: #6398df;
+                position: relative;
+                padding-top: 4.5px;
+                left: 212px;
+                border: none;
+                border-radius: 5px;
+                cursor: pointer;
+            }
+            #micBtn:hover {
+                background: #4678b9;
+            }
+            #micBtn.speaking {
+                background: #4678b9;
+            }
+            #results {
+                font-size: 16px;
+                background-color: lightblue;
+                border: 2px solid black;
+                border-radius: 15px;
+                display: none;
+                width: 150px;
+                position: relative;
+                margin-left: auto;
+                margin-right: auto;
+                bottom: 25px;
+            }
+            #searchInfoBtn {
+                background-color: #eabd77;
+                position: fixed;
+                bottom: 8px;
+                left: 10px;
+                width: 175px;
+                border: 3px solid black;
+                border-radius: 5px;
+                padding: 4px;
+            }
+            #infoWrapper {
+                position: fixed;
+                left: 10px;
+                bottom: 50px;
+                border: 3px solid black;
+                border-radius: 5px;
+                background-image: url("/infoBG.jpeg");
+                background-size: cover;
+                opacity: 0.85;
+                width: 380px;
+                display: none;
+            }
+            p {
+                margin-left: 10px;
+                text-align: left;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>Exa Search Engine</h1>
+        <h2>Start Searching Now!</h2>
+
+        <button id="searchInfoBtn">Show Voice Commands</button>
+        <div id="infoWrapper" style="display: none;">
+            <p>Say <strong>"Refresh"</strong> to refresh the page</p>
+            <P>Say <strong>"Dark Mode"</strong> to turn on Dark Mode</P>
+            <P>Say <strong>"Light Mode"</strong> to turn on Light Mode</P>
+            <p>Say <strong>"Clear History"</strong> to clear the current search history</p>
+            <p>Say <strong>"Search for (your intended search)"</strong> to search your inquiry or just <strong>say your inquiry</strong> and it'll automatically type it up for you!</p>
+            <p><strong>*Warning: sometimes the command will be hard to hear</strong></p>
+        </div>
+
+        <button id="darkModeBtn">Dark Mode</button>
+
+        <div id="searchWrapper">
+            <textarea id="query" placeholder="What's the total number of enrolled students at UC Berkeley" rows="2"></textarea>
+            <button id="searchBtn">Search</button>
+            <button id="micBtn"><img src="/mic.png" width="18" height="18"></button>
+        </div>
+
+        <div id="results"></div>
+
+        <script>
+            const searchInfoBtn = document.getElementById("searchInfoBtn");
+            const infoWrapper = document.getElementById("infoWrapper");
+
+            let infoShown = false;
+
+            if (searchInfoBtn) {
+                searchInfoBtn.addEventListener("click", function() {
+                    if (infoShown == false) {
+                        searchInfoBtn.innerHTML = "Hide Voice Commands";
+                        infoWrapper.style.display = "block";
+                        infoShown = true;
+                    } else {
+                        searchInfoBtn.innerHTML = "Show Voice Commands";
+                        infoWrapper.style.display = "none";
+                        infoShown = false;
+                    }
+                })
+            }
+
+            const darkBtn = document.getElementById("darkModeBtn");
+            if (localStorage.getItem("darkMode") === "true") {
+                document.body.classList.add("dark");
+                darkBtn.innerHTML = "Light Mode";
+                darkBtn.classList.add("light");
+            }
+            darkBtn.addEventListener("click", function() {
+                document.body.classList.toggle("dark");
+                const isDark = document.body.classList.contains("dark");
+                localStorage.setItem("darkMode", isDark);
+                darkBtn.innerHTML = isDark ? "Light Mode" : "Dark Mode";
+                darkBtn.classList.toggle("light", isDark);
+            });
+
+            const btn = document.getElementById("searchBtn");
+            btn.addEventListener("click", function () {
+                search();
+            });
+
+            document.getElementById("query").addEventListener("keypress", function(e) {
+                if (e.key === "Enter") {
+                    e.preventDefault();
+                    search();
+                }
+            });
+
+            function search() {
+                const query = document.getElementById("query").value.trim();
+                const results = document.getElementById("results");
+
+                if (!query) {
+                    results.innerHTML = "Enter a question!";
+                    results.style.display = "block";
+                    return;
+                } else {
+                    results.innerHTML = "Searching...";
+                    results.style.display = "block";
+                }
+                
+                window.location.href = `/results?q=${encodeURIComponent(query)}`;
+            }
+            
+            const micBtn = document.getElementById("micBtn");
+            
+            if ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window) {
+                const voiceInput = new (window.SpeechRecognition || window.webkitSpeechRecognition) ();
+                voiceInput.lang = "en-US";
+                voiceInput.continuous = false;
+
+                let isSpeaking = false;
+
+                if (micBtn) {
+                    micBtn.addEventListener("click", function() {
+                        if (isSpeaking) {
+                            voiceInput.abort();
+                            isSpeaking = false;
+                            micBtn.classList.remove("speaking");
+                        } else {
+                            voiceInput.start();
+                            isSpeaking = true;
+                            micBtn.innerHTML = '<img src="/speaking.png" width="18" height="18">';
+                            micBtn.classList.add("speaking");
+                        }
+                    });
+                }
+
+                voiceInput.onresult = function(e) {
+                    const transcript = e.results[0][0].transcript;
+                    const textarea = document.getElementById("query") || document.getElementById("emptyQuery");
+                    const cmd = transcript.toLowerCase().trim().replace(/[.,!?]$/g, "");
+
+                    if (cmd === "dark mode") {
+                        document.body.classList.add("dark");
+                        localStorage.setItem("darkMode", true);
+                    } else if (cmd === "light mode") {
+                        document.body.classList.remove("dark");
+                        localStorage.setItem("darkMode", false);
+                    } else if (cmd === "refresh") {
+                        window.location.reload();
+                    } else if (cmd.startsWith("search for")) {
+                        textarea.value = cmd.replace("search for ").trim();
+                    } else {
+                        textarea.value = transcript;
+                    }
+                }
+
+                voiceInput.onend = function() {
+                    isSpeaking = false;
+                    if (micBtn) {
+                        micBtn.innerHTML = '<img src="/mic.png" width="18" height="18">';
+                        micBtn.classList.remove("speaking");
+                    }
+                }
+
+                voiceInput.onerror = function() {
+                    isSpeaking = false;
+                    if (micBtn) {
+                        micBtn.innerHTML = '<img src="/mic.png" width="18" height="18">';
+                        micBtn.classList.remove("speaking");
+                    }
+                }
+            } else {
+                if (micBtn) {
+                    micBtn.style.display = "none"
+                };
+            }
+        </script>
+    </body>
+</html>

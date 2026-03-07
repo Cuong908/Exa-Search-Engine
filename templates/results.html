@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <style>
+            body {
+                font-family: 'Times New Roman', Times, serif;
+                overflow-y: auto;
+            }
+            body.dark {
+                background-color: #1a1a1a;
+                color: white;
+            }
+            body.dark h1, body.dark h2 {
+                background-color: #1a1a1a;
+                color: white;
+            }
+            body.dark .resultHeaders {
+                background-color: #2a5a8a;
+                color: white;
+            }
+            body.dark .resultRows {
+                border-color: #555;
+                background-color: #2a2a2a;
+                color: white;
+            }
+            body.dark .desColumn {
+                border-color: #555;
+            }
+            body.dark .urlContent a {
+                color: white;
+            }
+            body.dark .urlContent a:hover {
+                color: #aad4ff;
+            }
+            body.dark #query, body.dark #resultNum {
+                color: white;
+            }
+            body.dark #searchMsg {
+                color: black;
+            }
+            body.dark #secSearchWrapper {
+                background: #2a4a6a;
+                border-color: #4a7aaa;
+            }
+            body.dark textarea::placeholder, body.dark #contQuery {
+                color: white;
+            }
+            body.dark #contMicBtn {
+                background-image: url('/mic_dark.png');
+                background: #4678b9;
+            }
+            body.dark #contMicBtn:hover {
+                background: #6398df;
+            }
+            body.dark #contMicBtn.speaking {
+                background: #6398df;
+            }
+            body.dark #hiddenBar {
+                background-color: #1a1a1a;
+            }
+            body.dark .emptyPage {
+                color: white;
+            }
+            body.dark #emptySearchWrapper {
+                background: #2a4a6a;
+                border-color: #4a7aaa;
+            }
+            body.dark #emptyQuery::placeholder, body.dark #emptyQuery {
+                color: white;
+            }
+            body.dark #errorMsg, body.dark #emptySearchMsg {
+                color: black;
+            }
+            body.dark #emptyMicBtn {
+                background: #4678b9;
+            }
+            body.dark #emptyMicBtn:hover {
+                background: #6398df;
+            }
+            body.dark #emptyMicBtn.speaking {
+                background: #6398df;
+            }
+            body.dark .errorSession {
+                background: #4a1a1a;
+            }
+            #darkModeBtn.light {
+                background-color: white;
+                color: black;
+            }
+            #darkModeBtn.light:hover {
+                background-color: #ddd;
+            }
+            #darkModeBtn {
+                position: fixed;
+                bottom: 8px;
+                right: 10px;
+                z-index: 1000;
+                padding: 6px 12px;
+                font-size: 11px;
+                background-color: #333;
+                color: white;
+                border: none;
+                border-radius: 5px;
+                cursor: pointer;
+            }
+            #darkModeBtn:hover {
+                background-color: #555;
+            }
+            h1 {
+                position: relative;
+                bottom: 10px;
+                background-color: white;
+                width: 100%;
+            }
+            #contSearchInfoBtn {
+                background-color: #eabd77;
+                position: fixed;
+                bottom: 8px;
+                left: 10px;
+                width: 175px;
+                border: 3px solid black;
+                border-radius: 5px;
+                padding: 4px;
+                z-index: 1000;
+            }
+            #contInfoWrapper {
+                position: fixed;
+                left: 10px;
+                bottom: 50px;
+                border: 3px solid black;
+                border-radius: 5px;
+                background-image: url("/infoBG.jpeg");
+                background-size: cover;
+                opacity: 0.85;
+                width: 270px;
+                display: none;
+                z-index: 1000;
+            }
+            .vCMD {
+                color:black;
+                margin-left: 10px;
+                text-align: left;
+            }
+            #allResultsContainer {
+                margin-bottom: 145px;
+            }
+            .resultContainer {
+                margin-left: 335px;
+                margin-right: 295px;
+            }
+            .resultRows {
+                display: grid;
+                grid-template-columns: 175px 325px 125px;
+                gap: 0px 10px;
+                margin-bottom: 10px;
+                border: 2px solid black;
+                border-radius: 5px;
+                max-height: 90px;
+                width: 850px;
+                align-items: start;
+            }
+            .resultHeaders {
+                display: grid;
+                grid-template-columns: 175px 325px 125px;
+                width: 830px;
+                gap: 0;
+                margin-bottom: 10px;
+                padding: 10px;
+                font-weight: bold;
+                font-size: 16px;
+                border: 1px solid black;
+                border-radius: 5px;
+                background-color: lightblue;
+            }
+            .desHeader {
+                margin-left: 21px;
+            }
+            .urlHeader {
+                margin-left: 125px;
+            }
+            .resultHeaders > div {
+                text-align: left;
+                padding: 0px 10px;
+            }
+            .titleColumn {
+                width: 175px;
+                padding: 2px 10px;
+            }
+            .desColumn {
+                width: 410px;
+                padding: 2px 10px;
+                text-align: left;
+                margin-left: 10px;
+                border-right: 2px solid #ddd;
+                border-left: 2px solid #ddd;
+                max-height: 100px;
+            }
+            .urlColumn {
+                width: 190px;
+                padding: 0px 125px;
+                display: flex;
+                flex-direction: column;
+            }
+            .dateContent {
+                font-size: 11px;
+                margin: 0px;
+            }
+            .titleContent {
+                font-size: 14px;
+                font-weight: bold;
+                position: relative;
+                bottom: 3px;
+                margin: 14px 0px 1px;
+            }
+            .desContent {
+                font-size: 14px;
+                max-height: 95px;
+                margin-left: 13px;
+                margin-right: 10px;
+                position: relative;
+                bottom: 2px;
+            }
+            .urlContent a {
+                color: black;
+                text-align: left;
+                text-decoration: none;
+                word-break: break-all;
+                font-size: 14px;
+                max-width: 100%;
+                position: relative;
+                bottom: 6px;
+            }
+            .urlContent a:hover {
+                color: darkblue;
+                text-decoration: underline;
+            }
+            #query, #resultNum {
+                margin-left: 337px;
+            }
+            #resultNum {
+                margin-bottom: 6px;
+            }
+            textarea { 
+                font-size: 16px;
+                resize: none;
+                width: 650px;
+                overflow: auto;
+                line-height: inherit;
+                box-sizing: border-box;
+                border: none;
+                background: none;
+            }
+            textarea::placeholder {
+                color: #48474a;
+                position: absolute;
+                cursor: text;
+            }
+            textarea:focus {
+                border: none;
+                outline: none;
+            }
+            #contQuery {
+                position: relative;
+                left: 18px;
+                padding-top: 5px;
+            }
+            #contSearchBtn {
+                position: relative;
+                bottom: 6px;
+                left: 135px;
+            }
+            #secSearchWrapper {
+                background: #6398df;
+                border: 3px solid #9cc6ff;
+                border-radius: 15px;
+                width: 850px;
+                position: fixed;
+                margin-left: 335px;
+                margin-right: 305px;
+                bottom: 17px;
+                z-index: 999;
+            }
+            #contSearchBtn {
+                padding: 6px 12px; 
+                font-size: 8px;
+                background-color: #4CAF50;
+                color: white;
+                border: 1px solid none;
+                border-radius: 5px;
+                cursor: pointer;
+            }
+            #contSearchBtn:hover {
+                background-color: #45a049;
+            }
+            #contMicBtn {
+                background: #6398df;
+                position: relative;
+                padding-top: 4.5px;
+                right: 36px;
+                border: none;
+                border-radius: 5px;
+                cursor: pointer;
+            }
+            #contMicBtn:hover {
+                background: #4678b9;
+            }
+            #contMicBtn.speaking {
+                background: #4678b9;
+            }
+            #searchMsg {
+                font-size: 16px;
+                background-color: lightblue;
+                border: 2px solid black;
+                border-radius: 15px;
+                display: none;
+                width: 163px;
+                position: fixed;
+                margin-left: 10px;
+                bottom: 27px;
+                text-align: center;
+            }
+            #clearHistoryBtn {
+                padding: 6px 12px; 
+                font-size: 8px;
+                background-color: #af4c4c;
+                color: white;
+                border: 1px solid none;
+                border-radius: 5px;
+                cursor: pointer;
+                position: relative;
+                bottom: 6px;
+                right: 35px;
+            }
+            #clearHistoryBtn:hover {
+                background-color: #a04545;
+            }
+            #hiddenBar {
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                width: 100%;
+                height: 135px;
+                background-color: white;
+                z-index: 998;
+            }
+            h2 {
+                font-size: 80px;
+                position: relative;
+                top: 150px;
+            }
+            .emptyPage {
+                text-align: center;
+                margin-top: 100px;
+                color: black;
+                font-size: 30px;
+            }
+            #emptyQuery { 
+                font-size: 16px;
+                resize: none;
+                width: 650px;
+                overflow: auto;
+                line-height: inherit;
+                box-sizing: border-box;
+                border: none;
+                background: none;
+                position: relative;
+                padding-top: 5px;
+                padding-left: 10px;
+                margin-right: 20px;
+            }
+            #emptyQuery::placeholder {
+                color: #48474a;
+                position: absolute;
+                cursor: text;
+            }
+            #emptyQuery:focus {
+                border: none;
+                outline: none;
+            }
+            #emptySearchWrapper {
+                background: #6398df;
+                border: 3px solid #9cc6ff;
+                border-radius: 15px;
+                width: 850px;
+                position: relative;
+                margin-left: 335px;
+                margin-right: 305px;
+                top: 110px;
+            }
+            #emptySearchBtn {
+                padding: 6px 12px; 
+                font-size: 8px;
+                background-color: #4CAF50;
+                color: white;
+                border: 1px solid none;
+                border-radius: 5px;
+                cursor: pointer;
+                position: relative;
+                bottom: 6px;
+                left: 110px;
+            }
+            #emptySearchBtn:hover {
+                background-color: #45a049;
+            }
+            #emptyMicBtn {
+                background: #6398df;
+                position: relative;
+                padding-top: 4.5px;
+                bottom: 1px;
+                right: 64px;
+                border: none;
+                border-radius: 5px;
+                cursor: pointer;
+            }
+            #emptyMicBtn:hover {
+                background: #4678b9;
+            }
+            #emptyMicBtn.speaking {
+                background: #4678b9;
+            }
+            #emptyClearHistoryBtn {
+                padding: 6px 12px; 
+                font-size: 8px;
+                background-color: #af4c4c;
+                color: white;
+                border: 1px solid none;
+                border-radius: 5px;
+                cursor: pointer;
+                position: relative;
+                bottom: 6px;
+                left: -67px;
+            }
+            #emptyClearHistoryBtn:hover {
+                background-color: #a04545;
+            }
+            #emptySearchMsg {
+                font-size: 16px;
+                background-color: lightblue;
+                border: 2px solid black;
+                border-radius: 15px;
+                display: none;
+                width: 163px;
+                position: absolute;
+                margin-left: 343px;
+                bottom: 322px;
+                text-align: center;
+            }
+            #errorMsg {
+                font-size: 14px;
+                background-color: lightblue;
+                border: 2px solid black;
+                border-radius: 15px;
+                display: none;
+                width: 130px;
+                position: absolute;
+                top: 67px;
+                right: 702px;
+                margin-left: 684px;
+            }
+            .errorSession {
+                border-left-color: #ff6b6b;
+                background: #ffe6e6;
+            }
+        </style>
+    </head>
+    <body>
+        <button id="contSearchInfoBtn">Show Voice Commands</button>
+        <div id="contInfoWrapper" style="display: none;">
+            <p class="vCMD">Say <strong>"Refresh"</strong> to refresh the page</p>
+            <P class="vCMD">Say <strong>"Dark Mode"</strong> to turn on Dark Mode</P>
+            <P class="vCMD">Say <strong>"Light Mode"</strong> to turn on Light Mode</P>
+            <p class="vCMD">Say <strong>"Clear History"</strong> to clear the current search history</p>
+            <p class="vCMD">Say <strong>"Search for (your intended search)"</strong> to search your inquiry or just <strong>say your inquiry</strong> and it'll automatically type it for you!</p>
+            <p class="vCMD"><strong>*Warning: sometimes the command will be hard to hear</strong></p>
+        </div>
+
+        <button id="darkModeBtn">Dark Mode</button>
+
+        <div id="allResultsContainer">
+            {% if hasSearches %}
+                {% for search in allSearches %}
+                    <div class="searchSession {% if search.error %}errorSession{% endif %}">
+                        <h1>{{ search.query }} - Search Results</h1>
+                        <div id="query">Showing results for "{{ search.query }}"</div>
+                        <div id="resultNum">Found {{ search.results|length }} results</div>
+                        
+                        <div class="resultContainer">
+                            <div class="resultHeaders">
+                                <div class="titleHeader">Title & Date</div>
+                                <div class="desHeader">Description</div>
+                                <div class="urlHeader">Url</div>
+                            </div>
+                            {% for result in search.results %}
+                                <div class="resultRows">
+                                    <div class="titleColumn">
+                                        <p class="titleContent">
+                                            {% if result.title %}
+                                                {{ result.title }}
+                                            {% else %}
+                                                N/A
+                                            {% endif %}
+                                        </p>
+                                        <p class="dateContent">
+                                            Published Date: 
+                                            {% if result.published_date %}
+                                                {{ result.published_date }}
+                                            {% else %}
+                                                N/A
+                                            {% endif %}
+                                        </p>
+                                    </div>
+                                    <div class="desColumn">
+                                        <p class="desContent">{{ result.description }}</p>
+                                    </div>
+                                    <div class="urlColumn">
+                                        <p class="urlContent">
+                                            <a href="{% if result.url %}{{ result.url }}{% else %}#{% endif %}" target="_blank">
+                                                {% if result.url %}
+                                                    {{ result.url }}
+                                                {% else %}
+                                                    N/A
+                                                {% endif %}
+                                            </a>
+                                        </p>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div class="emptyPage">
+                    <h2>Exa Search Engine</h2>
+
+                    <div id="emptySearchWrapper">
+                        <textarea id="emptyQuery" placeholder="Ask anything..." rows="5"></textarea>
+                        <button id="emptySearchBtn">Search</button>
+                        <button id="emptyMicBtn"><img src="/mic.png" width="18" height="18"></button>
+                        <button id="emptyClearHistoryBtn">Clear History</button>
+                        <p id="errorMsg"></p>
+                    </div>
+
+                    <div id="emptySearchMsg"></div>
+
+                </div>
+            {% endif %}
+        </div>
+        
+        {% if hasSearches %}
+        <div id="secSearchWrapper">
+            <textarea id="contQuery" placeholder="Ask anything..." rows="5"></textarea>
+            <button id="contSearchBtn">Search</button>
+            <button id="contMicBtn"><img src="/mic.png" width="18" height="18"></button>
+            <button id="clearHistoryBtn" onclick="clearHistory()">Clear History</button>
+            <div id="searchMsg"></div>
+        </div>
+        <div id="hiddenBar"></div>
+        {% endif %}
+
+        <script>
+            const sessionID = "{{ sessionID }}";
+
+            const contSearchInfoBtn = document.getElementById("contSearchInfoBtn");
+            const contInfoWrapper = document.getElementById("contInfoWrapper");
+
+            let contInfoShown = false;
+
+            if (contSearchInfoBtn) {
+                contSearchInfoBtn.addEventListener("click", function() {
+                    if (contInfoShown == false) {
+                        contSearchInfoBtn.innerHTML = "Hide Voice Commands";
+                        contInfoWrapper.style.display = "block";
+                        contInfoShown = true;
+                    } else {
+                        contSearchInfoBtn.innerHTML = "Show Voice Commands";
+                        contInfoWrapper.style.display = "none";
+                        contInfoShown = false;
+                    }
+                })
+            }
+
+            const darkBtn = document.getElementById("darkModeBtn");
+            if (localStorage.getItem("darkMode") === "true") {
+                document.body.classList.add("dark");
+                darkBtn.innerHTML = "Light Mode";
+                darkBtn.classList.add("light");
+            }
+            darkBtn.addEventListener("click", function() {
+                document.body.classList.toggle("dark");
+                const isDark = document.body.classList.contains("dark");
+                localStorage.setItem("darkMode", isDark);
+                darkBtn.innerHTML = isDark ? "Light Mode" : "Dark Mode";
+                darkBtn.classList.toggle("light", isDark);
+            });
+
+            const contBtn = document.getElementById("contSearchBtn");
+            if (contBtn) {
+                contBtn.addEventListener("click", function () {
+                    contSearch();
+                });
+            }
+
+            const contQuerySearch = document.getElementById("contQuery")
+            if (contQuerySearch) {
+                contQuerySearch.addEventListener("keypress", function(e) {
+                    if (e.key == "Enter") {
+                        e.preventDefault();
+                        contSearch();
+                    }
+                });
+            }
+
+            function contSearch() {
+                const contQuery = document.getElementById("contQuery").value.trim();
+                const searchMsg = document.getElementById("searchMsg");
+
+                if (!contQuery) {
+                    searchMsg.innerHTML = "Please enter something";
+                    searchMsg.style.display = "block";
+                    return;
+                } else {
+                    searchMsg.innerHTML = "Searching...";
+                    searchMsg.style.display = "block";
+                }
+
+                window.location.href = `/results?q=${encodeURIComponent(contQuery)}&sessionID=${sessionID}`;
+            }
+            
+            const emptyBtn = document.getElementById("emptySearchBtn")
+            if (emptyBtn) {
+                emptyBtn.addEventListener("click", function() {
+                    emptySearch();
+                })
+            }
+
+            const emptyQuerySearch = document.getElementById("emptyQuery")
+            if (emptyQuerySearch) {
+                emptyQuerySearch.addEventListener("keypress", function(e) {
+                    if (e.key == "Enter") {
+                        e.preventDefault();
+                        emptySearch();
+                    }
+                });
+            }
+
+            function emptySearch() {
+                const emptyQuery = document.getElementById("emptyQuery").value.trim();
+                const emptySearchMsg = document.getElementById("emptySearchMsg");
+
+                if (!emptyQuery) {
+                    emptySearchMsg.innerHTML = "Please enter something";
+                    emptySearchMsg.style.display = "block";
+
+                    setTimeout(() => {
+                        emptySearchMsg.style.display = "none";
+                    }, 1750);
+                    return;
+                } else {
+                    emptySearchMsg.innerHTML = "Searching...";
+                    emptySearchMsg.style.display = "block";
+                }
+
+                window.location.href = `/results?q=${encodeURIComponent(emptyQuery)}&sessionID=${sessionID}`;
+            }
+
+            const clearBtn = document.getElementById("emptyClearHistoryBtn")
+            const errorMsg = document.getElementById("errorMsg")
+            if (clearBtn) {
+                clearBtn.addEventListener("click", function() {
+                    errorMsg.innerHTML = "No History Found";
+                    errorMsg.style.display = "block";
+
+                    setTimeout(() => {
+                        errorMsg.style.display = "none";
+                    }, 1750);
+                });
+            }
+
+            function clearHistory() {
+                if (confirm("Clear all search history in this session?")) {
+                    fetch(`/clearSearch/${sessionID}`, { method: 'POST' })
+                        .then(() => {
+                            window.location.href = `/results?q=&sessionID=${sessionID}`;
+                        })
+                        .catch(error => {
+                            console.error("Error:", error);
+                            alert("Error clearing history");
+                        });
+                }
+            }
+
+            const contMicBtn = document.getElementById("contMicBtn");
+            const emptyMicBtn = document.getElementById("emptyMicBtn");
+
+            if ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window) {
+                const voiceInput = new (window.SpeechRecognition || window.webkitSpeechRecognition) ();
+                voiceInput.lang = "en-US";
+                voiceInput.continuous = false;
+
+                let isSpeaking = false;
+
+                if (contMicBtn) {
+                    contMicBtn.addEventListener("click", function() {
+                        if (isSpeaking) {
+                            voiceInput.abort();
+                            isSpeaking = false;
+                            contMicBtn.classList.remove("speaking");
+                        } else {
+                            voiceInput.start();
+                            isSpeaking = true;
+                            contMicBtn.innerHTML = '<img src="/speaking.png" width="18" height="18">';
+                            contMicBtn.classList.add("speaking");
+                        }
+                    });
+                }
+
+                if (emptyMicBtn) {
+                    emptyMicBtn.addEventListener("click", function() {
+                        if (isSpeaking) {
+                            voiceInput.abort();
+                            isSpeaking = false;
+                            emptyMicBtn.classList.remove("speaking");
+                        } else {
+                            voiceInput.start();
+                            isSpeaking = true;
+                            emptyMicBtn.innerHTML = '<img src="/speaking.png" width="18" height="18">';
+                            emptyMicBtn.classList.add("speaking");
+                        }
+                    });
+                }
+
+                voiceInput.onresult = function(e) {
+                    const transcript = e.results[0][0].transcript;
+                    const textarea = document.getElementById("contQuery") || document.getElementById("emptyQuery");
+                    const cmd = transcript.toLowerCase().trim().replace(/[.,!?]$/g, "");
+
+                    if (cmd === "clear history") {
+                        clearHistory();
+                    } else if (cmd === "dark mode") {
+                        document.body.classList.add("dark");
+                        localStorage.setItem("darkMode", true);
+                    } else if (cmd === "light mode") {
+                        document.body.classList.remove("dark");
+                        localStorage.setItem("darkMode", false);
+                    } else if (cmd === "refresh") {
+                        window.location.reload();
+                    } else if (cmd.startsWith("search for")) {
+                        textarea.value = cmd.replace("search for ").trim();
+                    } else {
+                        textarea.value = transcript;
+                    }
+                }
+
+                voiceInput.onend = function() {
+                    isSpeaking = false;
+                    if (contMicBtn) {
+                        contMicBtn.innerHTML = '<img src="/mic.png" width="18" height="18">';
+                        contMicBtn.classList.remove("speaking");
+                    }
+                    if (emptyMicBtn) {
+                        emptyMicBtn.innerHTML = '<img src="/mic.png" width="18" height="18">';
+                        emptyMicBtn.classList.remove("speaking");
+                    }
+                }
+
+                voiceInput.onerror = function() {
+                    isSpeaking = false;
+                    if (contMicBtn) {
+                        contMicBtn.innerHTML = '<img src="/mic.png" width="18" height="18">';
+                        contMicBtn.classList.remove("speaking");
+                    }
+                    if (emptyMicBtn) {
+                        emptyMicBtn.innerHTML = '<img src="/mic.png" width="18" height="18">';
+                        emptyMicBtn.classList.remove("speaking");
+                    }
+                }
+            } else {
+                if (contMicBtn) {
+                    contMicBtn.style.display = "none"
+                };
+                if (emptyMicBtn) {
+                    emptyMicBtn.style.display = "none"
+                };
+            }
+            
+            window.addEventListener('load', function() {
+                const allSearches = document.querySelectorAll('.searchSession');
+                if (allSearches.length > 0) {
+                    allSearches[allSearches.length - 1].scrollIntoView({ behavior: 'smooth' });
+                }
+            });
+        </script>
+    </body>
+</html>
