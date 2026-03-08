@@ -1,0 +1,4 @@
+exa_py
+fastapi
+uvicorn
+python-dotenv

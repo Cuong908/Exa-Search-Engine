@@ -32,7 +32,7 @@
             body.dark .urlContent a:hover {
                 color: #aad4ff;
             }
-            body.dark #query, body.dark #resultNum {
+            body.dark .query, body.dark .resultNum {
                 color: white;
             }
             body.dark #searchMsg {
@@ -234,10 +234,10 @@
                 color: darkblue;
                 text-decoration: underline;
             }
-            #query, #resultNum {
+            .query, .resultNum {
                 margin-left: 337px;
             }
-            #resultNum {
+            .resultNum {
                 margin-bottom: 6px;
             }
             textarea { 
@@ -264,11 +264,6 @@
                 left: 18px;
                 padding-top: 5px;
             }
-            #contSearchBtn {
-                position: relative;
-                bottom: 6px;
-                left: 135px;
-            }
             #secSearchWrapper {
                 background: #6398df;
                 border: 3px solid #9cc6ff;
@@ -281,6 +276,9 @@
                 z-index: 999;
             }
             #contSearchBtn {
+                position: relative;
+                bottom: 6px;
+                left: 135px;
                 padding: 6px 12px; 
                 font-size: 8px;
                 background-color: #4CAF50;
@@ -481,8 +479,8 @@
                 {% for search in allSearches %}
                     <div class="searchSession {% if search.error %}errorSession{% endif %}">
                         <h1>{{ search.query }} - Search Results</h1>
-                        <div id="query">Showing results for "{{ search.query }}"</div>
-                        <div id="resultNum">Found {{ search.results|length }} results</div>
+                        <div class="query">Showing results for "{{ search.query }}"</div>
+                        <div class="resultNum">Found {{ search.results|length }} results</div>
                         
                         <div class="resultContainer">
                             <div class="resultHeaders">
